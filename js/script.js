@@ -18,42 +18,66 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add more products as needed
     ];
 
-    const productGrid = document.querySelectorAll('.product-grid');
+    function createProductCard(product) {
+        const card = document.createElement('div');
+        card.classList.add('product-card');
+        card.innerHTML = `
+            <img src="${product.image}" alt="${product.title}">
+            <h3>${product.title}</h3>
+            <p>${product.price}</p>
+            <button class="view-details">View Details</button>
+        `;
+        card.querySelector('.view-details').addEventListener('click', () => {
+            modalImage.src = product.image;
+            modalTitle.textContent = product.title;
+            modalPrice.textContent = product.price;
+            modalDescription.textContent = product.description;
+            modal.style.display = 'flex';
+        });
+        return card;
+    }
 
-    productGrid.forEach(grid => {
-        const category = grid.parentElement.id;
-        products.filter(product => product.category === category || category === 'sale').forEach(product => {
-            const card = document.createElement('div');
-            card.classList.add('product-card');
-            card.innerHTML = `
-                <img src="${product.image}" alt="${product.title}">
-                <h3>${product.title}</h3>
-                <p>${product.price}</p>
-                <button class="view-details">View Details</button>
-            `;
-            grid.appendChild(card);
+    function loadProducts() {
+        const grids = {
+            women: document.getElementById('women-products'),
+            sale: document.getElementById('sale-products')
+        };
 
-            card.querySelector('.view-details').addEventListener('click', () => {
-                modalImage.src = product.image;
-                modalTitle.textContent = product.title;
-                modalPrice.textContent = product.price;
-                modalDescription.textContent = product.description;
-                modal.style.display = 'flex';
+        Object.values(grids).forEach(grid => grid.innerHTML = '');
+
+        products.forEach(product => {
+            if (grids[product.category]) {
+                grids[product.category].appendChild(createProductCard(product));
+            }
+        });
+    }
+
+    function toggleNav() {
+        navLinks.classList.toggle('active');
+    }
+
+    function closeModalHandler() {
+        modal.style.display = 'none';
+    }
+
+    function outsideClickHandler(e) {
+        if (e.target === modal) {
+            closeModalHandler();
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
             });
         });
     });
 
-    hamburger.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-    });
+    hamburger.addEventListener('click', toggleNav);
+    closeModal.addEventListener('click', closeModalHandler);
+    window.addEventListener('click', outsideClickHandler);
 
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
+    loadProducts();
 });
